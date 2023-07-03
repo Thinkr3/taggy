@@ -86,9 +86,22 @@ class ExifEditor:
         '''Saves the image with the new exif data'''
         self.img.save(self.src, exif=self.img_exif)
 
-# def open_image(path: str) -> Image: # FIXME: This function is not used
-#     '''Takes a path to an image and returns the image'''
-#     src = path
-#     img = Image.open(src)
-#     img_exif = img.getexif()
-#     return img
+    def close_image(self) -> None:
+        '''Closes the image'''
+        self.img.close()
+
+    def __del__(self) -> None:
+        '''Destructor'''
+        self.close_image()
+
+    def __repr__(self) -> str:
+        '''Returns the image path'''
+        return self.src
+    
+    def __str__(self) -> str:
+        '''Returns the image path'''
+        return self.src
+    
+    def __eq__(self, other) -> bool:
+        '''Returns True if the image paths are the same'''
+        return self.src == other.src
