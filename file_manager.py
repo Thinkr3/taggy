@@ -1,4 +1,5 @@
 import os
+import filetype as ft
 from exif_editor import ExifEditor
 
 
@@ -7,9 +8,10 @@ keys: dict = {}
 
 def keyword_frequency(folderpath: str = "") -> dict:
     for file in os.listdir(folder_path if folder_path != "" else os.getcwd()):
-        if os.path.isfile(file) and img.verify_image():
+        if os.path.isfile(file) and ft.image_match(file) != None:
             img = ExifEditor(file)
-            for keyword in img.keywords:
+            print(img.keywords)
+            for keyword in img.keywords:                
                 if keyword in keys:
                     keys[keyword] += 1
                 else:
