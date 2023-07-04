@@ -16,6 +16,8 @@ class ExifEditor:
     @property
     def title(self) -> str:
         '''Returns the image title exif'''
+        if self.img_exif.get(270) == None:
+            return ""
         return self.img_exif[270].decode("utf-16")
 
     def set_title(self, title: str) -> None:
@@ -24,14 +26,16 @@ class ExifEditor:
 
     def clear_title(self) -> None:
         '''Clears the image title exif'''
-        self.img_exif[270] = "".encode("utf-16")
+        if self.img_exif.get(270) == None:
+            return
+        del self.img_exif[270]
 
     @property
     def keywords(self) -> list:
         '''Returns the image keywords exif'''
         if self.img_exif.get(40094) == None:
             return []
-        return [decoded.replace("\ufeff", "") for decoded in self.img_exif[40094].decode("utf-16").split("; ")]
+        return [decoded.replace("\ufeff", "") for decoded in self.img_exif[40094].decode("utf-16").split(";")]
 
     def set_keywords(self, keywords: list) -> None:
         '''Takes a list of keywords and sets them as the image keyword exif'''
@@ -41,18 +45,34 @@ class ExifEditor:
 
     def clear_keywords(self) -> None:
         '''Clears all keywords from the image keyword exif'''
-        self.img_exif[40094] = "".encode("utf-16")
-
-    def remove_keyword(self, keyword: str) -> None:
-        '''Takes a keyword and removes it from the image keyword exif'''
         if self.img_exif.get(40094) == None:
             return
+        del self.img_exif[40094]
+
+    def remove_keyword(self, keyword: str) -> bool:
+        '''Takes a keyword and removes it from the image keyword exif'''
+        if self.img_exif.get(40094) == None:
+            return False
         if keyword.__contains__(";"):
-            keyword = keyword.replace(";", "")
-        self.img_exif[40094] = self.img_exif[40094].replace(keyword.encode("utf-16"), "".encode("utf-16")).removesuffix("; ".encode("utf-16"))
+            # keyword = keyword.replace(";", "")
+            return False
+        self.img_exif[40094] = self.img_exif[40094].replace((keyword + "\ufeff;").encode("utf-16"), "".encode("utf-16")) # FIXME: This is not working
+        return True
 
     def add_keyword(self, keyword: str) -> None:
         '''Takes a keyword and adds it to the image keyword exif'''
+        
+        # If the keyword is empty, don't add it
+        if keyword == "": 
+            return
+        
+        # Remove whitespaces
+        keyword = keyword.strip()
+
+        # If the keyword contains a semicolon, split it (Windows doesn't like semicolons)
+        if keyword.__contains__(";"):
+            self.add_keywords(keyword.split(";"))
+            return
 
         # If there is no keyword exif, create one
         if self.img_exif.get(40094) == None or self.img_exif.get(40094) == "".encode("utf-16"):
@@ -63,12 +83,13 @@ class ExifEditor:
         if self.img_exif[40094].__contains__(keyword.encode("utf-16")):
             return
         
-        # If the keyword contains a semicolon, remove it (Windows doesn't like semicolons)
-        if keyword.__contains__(";"):
-            keyword = keyword.replace(";", "")
-
         # If the keyword is not in the exif, add it
-        self.img_exif[40094] += "; ".encode("utf-16") + keyword.encode("utf-16")
+        self.img_exif[40094] += ";".encode("utf-16") + keyword.encode("utf-16")
+
+    def add_keywords(self, keywords: list) -> None:
+        '''Takes a list of keywords and adds them to the image keyword exif'''
+        for keyword in keywords:
+            self.add_keyword(keyword)
 
     def get_exif_data(self) -> dict:
         '''Returns the exif data of the image'''
@@ -104,4 +125,7 @@ class ExifEditor:
     
     def __eq__(self, other) -> bool:
         '''Returns True if the image paths are the same'''
-        return self.src == other.src
+        try:
+            return self.src == other.src
+        except:
+            return False
