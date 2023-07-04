@@ -6,7 +6,7 @@ class TestKeywordReader(unittest.TestCase):
     global jpg
     global png
     jpg = ExifEditor("ramen.jpg")
-    png = ExifEditor("venti.png")
+    png = ExifEditor("scientist.png")
 
     def setUp(self):
         jpg.clear_keywords()
@@ -81,6 +81,42 @@ class TestKeywordReader(unittest.TestCase):
         png.remove_keyword("arrow")
         self.assertEqual(jpg.keywords, [])
         self.assertEqual(png.keywords, [])
+
+    def test_remove_keyword(self):
+        jpg.add_keyword("soup")
+        jpg.remove_keyword("soup")
+        png.add_keyword("bow")
+        png.remove_keyword("bow")
+        self.assertEqual(jpg.keywords, [])
+        self.assertEqual(png.keywords, [])
+
+    def test_remove_multiple_keywords(self):
+        jpg.add_keyword("soup")
+        jpg.add_keyword("ramen")
+        jpg.remove_keyword("soup")
+        jpg.remove_keyword("ramen")
+        png.add_keyword("bow")
+        png.add_keyword("arrow")
+        png.remove_keyword("bow")
+        png.remove_keyword("arrow")
+        self.assertEqual(jpg.keywords, [])
+        self.assertEqual(png.keywords, [])
+
+    def test_remove_keyword_not_in_list(self):
+        jpg.add_keyword("soup")
+        jpg.remove_keyword("ramen")
+        png.add_keyword("bow")
+        png.remove_keyword("arrow")
+        self.assertEqual(jpg.keywords, ["soup"])
+        self.assertEqual(png.keywords, ["bow"])
+
+    def test_remove_keyword_with_semicolons(self):
+        jpg.add_keyword("soup; ramen")
+        jpg.remove_keyword("soup")
+        png.add_keyword("bow; arrow")
+        png.remove_keyword("bow")
+        self.assertEqual(jpg.keywords, ["ramen"])
+        self.assertEqual(png.keywords, ["arrow"])
 
     def tearDown(self):
         jpg.close_image()
