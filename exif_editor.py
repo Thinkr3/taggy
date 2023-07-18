@@ -35,7 +35,7 @@ class ExifEditor:
         '''Returns the image keywords exif'''
         if self.img_exif.get(40094) == None:
             return []
-        return [decoded.rstrip("\x00").replace("\ufeff", "") for decoded in self.img_exif[40094].decode("utf-16le").split(";")]
+        return [decoded.replace("\x00", "").replace("\ufeff", "") for decoded in self.img_exif[40094].decode("utf-16le").split(";")]
 
     def set_keywords(self, keywords: list) -> None:
         '''Takes a list of keywords and sets them as the image keyword exif'''
