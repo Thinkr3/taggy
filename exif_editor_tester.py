@@ -5,8 +5,8 @@ class TestKeywordReader(unittest.TestCase):
 
     global jpg
     global png
-    jpg = ExifEditor("ramen.jpg")
-    png = ExifEditor("scientist.png")
+    jpg = ExifEditor("images/forest.jpg")
+    png = ExifEditor("images/girl.png")
 
     def setUp(self):
         jpg.clear_keywords()
